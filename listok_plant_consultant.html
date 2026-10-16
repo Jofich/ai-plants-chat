@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flau — ИИ-консультант по растениям</title>
+<style>
+:root{--green:#244d3b;--green2:#38664e;--mint:#e8f1e8;--cream:#faf8f1;--ink:#203329;--muted:#68776d;--line:#dfe7dc;--white:#fff;--gold:#d7a85b}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}.app{min-height:100vh;display:grid;grid-template-columns:280px minmax(0,1fr);max-width:1440px;margin:auto}
+aside{background:#f0f3e9;border-right:1px solid var(--line);padding:26px 20px;display:flex;flex-direction:column;gap:24px}
+.brand{display:flex;align-items:center;gap:11px;font-size:22px;font-weight:800;letter-spacing:-.7px}.logo{width:54px;height:54px;flex:0 0 54px;display:grid;place-items:center}.logo img{display:block;width:54px;height:54px;object-fit:contain}
+.tagline{font-size:13px;color:var(--muted);line-height:1.5;margin-top:-17px}
+.side-label{text-transform:uppercase;letter-spacing:1.4px;font-size:10px;font-weight:800;color:#849084;margin-bottom:10px}
+.quick{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:13px;padding:12px 13px;color:var(--ink);cursor:pointer;margin-bottom:8px;transition:.2s}.quick:hover{border-color:#91ad91;transform:translateY(-1px)}.quick small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.notice{margin-top:auto;background:#fff9eb;border:1px solid #f0dfb8;border-radius:13px;padding:13px;font-size:12px;line-height:1.5;color:#775a25}
+main{display:flex;flex-direction:column;min-width:0;min-height:100vh}.topbar{height:76px;display:flex;align-items:center;justify-content:flex-end;padding:0 32px;background:rgba(250,248,241,.88)}.status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;transform:translateY(20px)}.dot{width:8px;height:8px;border-radius:50%;background:#e0a53f}.dot.connected{background:#4c9b65}
+.content{width:min(900px,100%);margin:0 auto;padding:18px 28px 22px;display:flex;flex-direction:column;flex:1}.hero{margin-bottom:26px}.eyebrow{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;font-weight:800;color:var(--green2)}h1{font-size:clamp(29px,4vw,43px);letter-spacing:-1.7px;line-height:1.08;margin:10px 0 12px;max-width:620px}.hero p{color:var(--muted);line-height:1.65;margin:0;max-width:620px;font-size:14px}
+.chat{display:flex;flex-direction:column;gap:16px;padding-bottom:20px}.welcome{border:1px solid var(--line);background:#fff;border-radius:20px;padding:20px;display:flex;gap:13px;align-items:flex-start}.avatar{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;background:var(--mint);border-radius:13px;font-size:20px}.msg-name{font-size:12px;font-weight:800;margin:1px 0 7px}.msg-text{font-size:14px;line-height:1.65;white-space:pre-wrap}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.chip{background:#f4f7f1;border:1px solid var(--line);border-radius:99px;padding:8px 11px;font-size:12px;cursor:pointer;color:var(--green)}.chip:hover{background:var(--mint)}
+.message{display:flex;gap:12px;align-items:flex-start}.message.user{justify-content:flex-end}.bubble{max-width:min(690px,90%);padding:14px 16px;border-radius:17px;background:#fff;border:1px solid var(--line);font-size:14px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}.user .bubble{background:var(--green);color:#fff;border-color:var(--green);border-bottom-right-radius:5px}.assistant .bubble{border-bottom-left-radius:5px}.mini-avatar{width:30px;height:30px;flex:0 0 30px;border-radius:10px;background:var(--mint);display:grid;place-items:center}
+.composer-wrap{position:sticky;bottom:0;padding:14px 28px 22px;background:linear-gradient(transparent,var(--cream) 18%)}.composer{width:min(844px,100%);margin:auto;background:#fff;border:1px solid #d7e0d4;box-shadow:0 8px 28px #2d4a3010;border-radius:18px;padding:9px;display:flex;gap:8px;align-items:flex-end}.composer textarea{flex:1;resize:none;border:0;outline:0;padding:11px 12px;max-height:130px;min-height:45px;background:transparent;color:var(--ink);font:inherit;font-size:14px}.send{width:44px;height:44px;border:0;border-radius:13px;background:var(--green);color:white;cursor:pointer;font-size:20px}.send:disabled{opacity:.45;cursor:wait}.foot{width:min(844px,100%);margin:8px auto 0;text-align:center;font-size:10px;color:#879187;line-height:1.5}.typing{display:inline-flex;gap:4px;padding:4px}.typing span{width:6px;height:6px;background:#8da28e;border-radius:50%;animation:b 1s infinite alternate}.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}@keyframes b{to{opacity:.3;transform:translateY(-3px)}}
+@media(max-width:760px){.app{grid-template-columns:minmax(0,1fr);min-height:100vh;min-height:100dvh}aside{display:none}main{min-height:100vh;min-height:100dvh}.topbar{height:54px;flex:0 0 54px;padding:0 16px}.status{font-size:11px;transform:none}.content{width:100%;padding:8px 14px 12px}.hero{margin-bottom:16px}.eyebrow{font-size:10px}h1{font-size:30px;line-height:1.1;margin:8px 0 10px}.hero p{font-size:14px;line-height:1.55}.chat{gap:12px;padding-bottom:14px}.welcome{padding:15px;border-radius:16px;gap:10px}.avatar{width:34px;height:34px;flex-basis:34px;border-radius:11px;font-size:18px}.msg-text{font-size:14px;line-height:1.55}.chips{gap:7px;margin-top:12px}.chip{min-height:42px;padding:9px 12px;font-size:12px}.composer-wrap{padding:8px 10px calc(10px + env(safe-area-inset-bottom));background:var(--cream)}.composer{border-radius:16px;padding:7px;gap:6px}.composer textarea{min-height:44px;padding:11px 10px;font-size:16px}.send{width:44px;height:44px;flex:0 0 44px;border-radius:12px}}
+@media(max-width:380px){.content{padding-right:12px;padding-left:12px}.welcome{padding:13px}.chips{gap:6px}.chip{padding:8px 10px;font-size:11px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <div class="brand"><div class="logo"><img src="sources/IMG_9574.PNG" alt="Flau"></div><span>Flau</span></div>
+  <div class="tagline">Ваш спокойный и внимательный помощник в мире растений.</div>
+  <section><div class="side-label">Попробуйте спросить</div>
+    <button class="quick" data-prompt="Как ухаживать за сансевиерией?">🌿 Уход за растением<small>Полив, свет и почва</small></button>
+    <button class="quick" data-prompt="Подбери растение для комнаты с небольшим количеством света.">☀️ Подобрать растение<small>По условиям дома</small></button>
+    <button class="quick" data-prompt="Мне нужно неприхотливое растение, я часто забываю поливать.">🪴 Для начинающих<small>Простое в уходе</small></button>
+    <button class="quick" data-prompt="Какие растения безопасны для кошек?">🐈 Если дома питомцы<small>Уточним по базе знаний</small></button>
+  </section>
+  <section><div class="side-label">Как работает консультант</div>
+    <div style="font-size:13px;line-height:1.8;color:#596b5d">01&nbsp; Каталог растений<br>02&nbsp; База знаний об уходе<br>03&nbsp; Уточняющие вопросы<br>04&nbsp; Честно признаёт пробелы</div>
+  </section>
+</aside>
+<main>
+  <header class="topbar"><div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Проверяем соединение…</span></div></header>
+  <div class="content">
+    <div class="hero"><div class="eyebrow">Растения, которым хорошо у вас</div><h1>Давайте найдём<br>ваше растение.</h1><p>Расскажите, где оно будет стоять и сколько времени вы готовы уделять уходу. Я помогу выбрать подходящий вариант и объясню, как за ним ухаживать.</p></div>
+    <div class="chat" id="chat">
+      <div class="welcome"><div class="avatar">🌱</div><div><div class="msg-name">Flau · ИИ-консультант</div><div class="msg-text">Привет! Я помогу выбрать комнатное растение и разобраться с уходом. Могу опираться на демонстрационный каталог и базу знаний. Если нужных сведений там нет, я так и скажу — без догадок.</div><div class="chips"><button class="chip" data-care-prompt data-prompt="Как ухаживать за лимонным деревом?" hidden>Уход за лимонным деревом</button><button class="chip" data-care-prompt data-prompt="Как ухаживать за плющом?" hidden>Уход за плющом</button><button class="chip" data-care-prompt data-prompt="Как ухаживать за фикусом?" hidden>Уход за фикусом</button><button class="chip" data-care-prompt data-prompt="Как ухаживать за денежным деревом?" hidden>Уход за денежным деревом</button><button class="chip" data-prompt="Хочу подобрать растение. Задай мне вопросы.">Подобрать растение</button><button class="chip" data-random-prompt>Проверить вопрос без ответа</button></div></div></div>
+    </div>
+  </div>
+  <div class="composer-wrap"><form class="composer" id="chatForm"><textarea id="userInput" rows="1" placeholder="Напишите свой вопрос…" aria-label="Ваш вопрос"></textarea><button class="send" id="sendBtn" aria-label="Отправить" type="submit">↑</button></form></div>
+</main>
+</div>
+<script>
+const WEBHOOK_URL = "https://kyplydrova.app.n8n.cloud/webhook/27e646bf-d450-4df6-8af4-cde4ded29e0b";
+const chat = document.getElementById('chat');
+const input = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const statusText = document.getElementById('statusText');
+const statusDot = document.getElementById('statusDot');
+const sessionId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'session-' + Date.now();
+
+function setStatus(text, connected=false){statusText.textContent=text;statusDot.classList.toggle('connected',connected)}
+function addMessage(text, role='assistant'){
+  const row=document.createElement('div'); row.className='message '+role;
+  if(role==='assistant'){const av=document.createElement('div');av.className='mini-avatar';av.textContent='🌿';row.appendChild(av)}
+  const bubble=document.createElement('div');bubble.className='bubble';bubble.textContent=text;row.appendChild(bubble);chat.appendChild(row);row.scrollIntoView({behavior:'smooth',block:'nearest'});return row;
+}
+function addTyping(){const row=addMessage('');row.querySelector('.bubble').innerHTML='<div class="typing"><span></span><span></span><span></span></div>';return row}
+function demoAnswer(q){
+ const s=q.toLowerCase();
+ if(/сансевиер|сансевьер|щучь/.test(s)) return 'Сансевиерия — неприхотливое комнатное растение. По учебной базе знаний: поставьте её в яркий рассеянный свет или полутень; поливайте после просыхания грунта, не оставляя воду в поддоне. Зимой полив обычно сокращают. Используйте горшок с дренажными отверстиями. Это демонстрационный ответ; при подключении вашей базы знаний ответы должны приходить из n8n.';
+ if(/подоб|выбрать|хочу растение|забываю полива|неприхотлив|мало свет|небольш.*свет|комнат/.test(s)) return 'Давайте подберём растение под ваши условия. Ответьте, пожалуйста, на несколько вопросов:\n1. Сколько естественного света в комнате: много, умеренно или мало?\n2. Как часто вам удобно поливать: раз в неделю, реже или готовы ухаживать чаще?\n3. Есть ли дома кошки или другие питомцы?\n4. Какой размер хотите: маленькое на стол, среднее или крупное?';
+ if(/лунн|сколько лет жив|неизвест|редк/.test(s)) return 'В демонстрационной базе знаний нет подтверждённой информации об этом. Не хочу придумывать ответ. Можно добавить сведения о растении в базу знаний, после чего консультант сможет ответить точнее.';
+ if(/кошка|кош|питом/.test(s)) return 'Безопасность для питомцев нужно проверять по конкретному виду растения. В демонстрационной базе нет полного подтверждённого списка безопасных растений, поэтому я не буду гарантировать безопасность. Напишите название растения, и после подключения расширенной базы знаний можно будет проверить сведения.';
+ return 'В демонстрационной базе пока нет подтверждённого ответа на этот вопрос. Я не буду придумывать сведения. Попробуйте спросить об уходе за сансевиерией или подберите растение по освещению, частоте полива и размеру.';
+}
+function extractAnswer(data){
+ if(typeof data==='string') return data;
+ if(Array.isArray(data)){for(const x of data){const a=extractAnswer(x);if(a)return a}return ''}
+ if(data && typeof data==='object'){
+  for(const k of ['output','text','answer','response','message','reply','result']) if(typeof data[k]==='string' && data[k].trim()) return data[k].trim();
+  if(data.data) return extractAnswer(data.data);
+ }
+ return '';
+}
+async function sendMessage(text){
+ text=text.trim();if(!text||sendBtn.disabled)return;
+ addMessage(text,'user');input.value='';input.style.height='auto';sendBtn.disabled=true;const typing=addTyping();
+ try{
+  const response=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({chatInput:text,message:text,question:text,sessionId,source:'plant-consultant-web'})});
+  const raw=await response.text();let data;try{data=JSON.parse(raw)}catch{data=raw}
+  if(!response.ok)throw new Error('Webhook вернул HTTP '+response.status);
+  const answer=extractAnswer(data);
+  if(!answer)throw new Error('В ответе webhook не найдено поле output/text/answer/response/message/reply/result');
+  typing.remove();addMessage(answer);setStatus('Консультант онлайн',true);
+ }catch(err){
+  typing.remove();
+  // Local fallback keeps the prototype demonstrable if the webhook is not configured or CORS blocks browser requests.
+  addMessage(demoAnswer(text));
+  setStatus('Консультант онлайн',false);
+  console.warn('n8n request failed:',err);
+ }finally{sendBtn.disabled=false;input.focus()}
+}
+document.getElementById('chatForm').addEventListener('submit',e=>{e.preventDefault();sendMessage(input.value)});
+const carePrompts=document.querySelectorAll('[data-care-prompt]');
+carePrompts[Math.floor(Math.random()*carePrompts.length)].hidden=false;
+document.querySelectorAll('[data-prompt]').forEach(el=>el.addEventListener('click',()=>sendMessage(el.dataset.prompt)));
+const unansweredPrompts=['Какая почва нужна розам','Подскажи мне цену баоба','Какое освещение нужно папоротникам','Погода в Таганрог','Салат из морепродуктов'];
+document.querySelector('[data-random-prompt]').addEventListener('click',()=>sendMessage(unansweredPrompts[Math.floor(Math.random()*unansweredPrompts.length)]));
+input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage(input.value)}});
+input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,130)+'px'});
+setStatus('Консультант онлайн',true);
+</script>
+</body>
+</html>
